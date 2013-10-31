@@ -18,6 +18,7 @@
 #include "TString.h"
 #include "TROOT.h"
 
+
 //from TTree.cxx
 static char DataTypeToChar(EDataType datatype)
 {
@@ -54,6 +55,7 @@ static char DataTypeToChar(EDataType datatype)
 }
 
 std::unordered_map<std::size_t, std::string> RootNtupleWriterTool::m_loaded_types;
+std::unordered_map<std::string, std::set<std::string> > RootNtupleWriterTool::m_files_associated_trees;
 
 /////////////////////////////////////////////////////////////////// 
 // Public methods: 
@@ -97,8 +99,6 @@ void RootNtupleWriterTool::Register() {
   inc_svc->addListener(this, "EndRun");
   inc_svc->addListener(this, "BeginRun",99); //first one!
   
-  //pre-load std::vector<> dictionnary:
-  gROOT->ProcessLine("#include <vector>");
 
 }
 
@@ -106,24 +106,67 @@ void RootNtupleWriterTool::Register() {
 ////////////////////////////
 int RootNtupleWriterTool::initialize()
 {
+
+  //pre-load std::vector<> dictionnary
+  //only if we haven't done so yet
+  if (m_files_associated_trees.empty()) {
+    gROOT->ProcessLine("#include <string>");
+    gROOT->ProcessLine("#include <vector>");
+  }
+  
   m_lock_tree = false;
     
   LOG ("Initializing " << name() << "... TTree = "<<m_ttree_name, logINFO);
   if (m_ttree_name == "") { LOG("TTree name unset", logERROR); return 0; }
   if (m_file_name == "") { LOG("File name unset", logERROR); return 0; }
-
-  m_file = new TFile(m_file_name.c_str(), "RECREATE");
-    if (m_file->IsZombie()) {
-       LOG("Error opening file", logERROR);
-       return 0;
-    }
+  
+  auto file_found = m_files_associated_trees.find(m_file_name);
+  
+  if (file_found == m_files_associated_trees.end()) {
+    
+    LOG("New file to open.. "<<m_file_name,logDEBUG);
+    
+    m_file = new TFile(m_file_name.c_str(), "RECREATE");
+      if (m_file->IsZombie()) {
+         LOG("Error opening file", logERROR);
+         return 0;
+      }
+  }
+  
+  LOG("Root path: "<< gDirectory->GetPath(), logDEBUG);
+  
+  auto & set_of_trees = m_files_associated_trees[m_file_name];
+  
+  auto tree_found = set_of_trees.find(m_ttree_name);
+  
+  if (tree_found != set_of_trees.end()) { LOG("Prob, TTree with name ["<<m_ttree_name<<"] already created..", logERROR); return 0; }
+  
+  // ? set working dir
   
   m_ttree = new TTree(m_ttree_name.c_str(), m_ttree_name.c_str());
+  set_of_trees.emplace(m_ttree_name);
+
+  // ? cd to previous working dir..
 
   m_loaded_types.clear();
   
   return 1;
   
+}
+
+
+// we shall stop filling the TTree
+/////////////////
+void RootNtupleWriterTool::stop() {
+
+     // Get handle on IncidentSvc
+  IncidentService * inc_svc = IncidentService::getInstance();
+  if (!inc_svc) {LOG("Coulnd't get IncidentService", logERROR); return; }
+  
+  //deregister ourselves
+  inc_svc->removeListener(this, "EndEvent");
+  inc_svc->removeListener(this, "BeginEvent");
+
 }
 
 /////////////////////////// cleanup
@@ -139,10 +182,26 @@ int RootNtupleWriterTool::finalize()
 
   m_collections.clear();
   
-  if (m_file) {
-    m_file->Write();
-    m_file->Close();
+  auto file_found = m_files_associated_trees.find(m_file_name);
+  if (file_found == m_files_associated_trees.end()) {
+     //nothing to be done, file was written out and closed by some other owner
+     return 1;
   }
+  
+  if (m_file) {
+    LOG("Writing, Closing file "<<m_file_name, logDEBUG);
+  
+    m_file->Write();
+    //m_file->Close();
+    delete m_file; //Close() is called in destructor
+    
+    //remove from list so that we don't double-write/close/delete
+    m_files_associated_trees.erase(file_found);
+  }
+  
+  //delete m_file will delete all associated TObject in same TDirectory
+  
+  //delete m_ttree;
   
   return 1;
 } 

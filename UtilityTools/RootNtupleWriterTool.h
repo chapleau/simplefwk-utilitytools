@@ -8,7 +8,7 @@
 // STL includes
 #include <string>
 #include <unordered_map>
-
+#include <set>
 
 // RootNtupleWriterTool includes
 #include "UtilityToolsInterfaces/IRootNtupleWriterTool.h"
@@ -49,6 +49,8 @@ class RootNtupleWriterTool
 
   virtual int pushBack(std::string, const boost::any&);
   
+  virtual void stop();
+  
   virtual IObjectHolder* getObjectHolder(std::string);
 
   //IIncidentListener impl
@@ -57,6 +59,7 @@ class RootNtupleWriterTool
 
  protected:
  
+ 
   std::string m_ttree_name;
   std::string m_file_name;
 
@@ -64,8 +67,11 @@ class RootNtupleWriterTool
   coll_store_t m_collections;
 
   
-  TTree* m_ttree;
+  TTree * m_ttree;
   TFile * m_file;
+  
+  static std::unordered_map<std::string, std::set<std::string> > m_files_associated_trees;
+  
     
   void Register();
     
