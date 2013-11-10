@@ -76,7 +76,7 @@ class RootNtupleWriterTool
   void Register();
     
   //share among instances of the tool
-  static std::unordered_map<std::size_t, std::string> m_loaded_types;
+  static std::unordered_multimap<std::size_t, std::string> m_loaded_types;
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 

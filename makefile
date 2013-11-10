@@ -5,7 +5,7 @@ LDFLAGSEXTRA=-install_name @rpath/UtilityTools/lib/
 OBJDIR=build
 LIBDIR=lib
 
-all: $(OBJDIR) $(LIBDIR) python/_RootNtupleWriterTool.so
+all: $(OBJDIR) $(LIBDIR) python/_RootNtupleTools.so
 
 $(OBJDIR):
 	mkdir $(OBJDIR)
@@ -13,20 +13,23 @@ $(OBJDIR):
 $(LIBDIR):
 	mkdir $(LIBDIR) 
 
-python/_RootNtupleWriterTool.so: lib/libRootNtupleWriterTool.so python/RootNtupleWriterTool_wrap.o
-	$(CC) $(LDFLAGS) python/RootNtupleWriterTool_wrap.o -lpython2.7 -Llib/ -lRootNtupleWriterTool -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o python/_RootNtupleWriterTool.so
+python/_RootNtupleTools.so: lib/libRootNtupleTools.so python/RootNtupleTools_wrap.o
+	$(CC) $(LDFLAGS) python/RootNtupleTools_wrap.o -lpython2.7 -Llib/ -lRootNtupleTools -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o python/_RootNtupleTools.so
 
-python/RootNtupleWriterTool_wrap.o: python/RootNtupleWriterTool_wrap.cxx
-	$(CC) $(CFLAGS) python/RootNtupleWriterTool_wrap.cxx -I/usr/include/python2.7/ -o python/RootNtupleWriterTool_wrap.o
+python/RootNtupleTools_wrap.o: python/RootNtupleTools_wrap.cxx
+	$(CC) $(CFLAGS) python/RootNtupleTools_wrap.cxx -I/usr/include/python2.7/ -o python/RootNtupleTools_wrap.o
 
-python/RootNtupleWriterTool_wrap.cxx:
-	swig -Wall -c++ -python python/RootNtupleWriterTool.i
+python/RootNtupleTools_wrap.cxx:
+	swig -Wall -c++ -python python/RootNtupleTools.i
 
-lib/libRootNtupleWriterTool.so: build/RootNtupleWriterTool.o build/type.o
-	$(CC) $(LDFLAGS) $(LDFLAGSEXTRA)libRootNtupleWriterTool.so build/RootNtupleWriterTool.o build/type.o `root-config --libs` -L../Services/lib -lServices -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o lib/libRootNtupleWriterTool.so
+lib/libRootNtupleTools.so: build/RootNtupleWriterTool.o build/RootNtupleReaderTool.o build/type.o
+	$(CC) $(LDFLAGS) $(LDFLAGSEXTRA)libRootNtupleTools.so build/RootNtupleWriterTool.o build/RootNtupleReaderTool.o build/type.o `root-config --libs` -L../Services/lib -lServices -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o lib/libRootNtupleTools.so
 
 build/RootNtupleWriterTool.o: src/RootNtupleWriterTool.cxx
 	$(CC) $(CFLAGS) src/RootNtupleWriterTool.cxx `root-config --cflags` -o build/RootNtupleWriterTool.o
+
+build/RootNtupleReaderTool.o: src/RootNtupleReaderTool.cxx
+	$(CC) $(CFLAGS) src/RootNtupleReaderTool.cxx `root-config --cflags` -o build/RootNtupleReaderTool.o
 
 build/type.o: src/type.cpp UtilityTools/type.hpp
 	$(CC) $(CFLAGS) src/type.cpp -o build/type.o 
@@ -35,6 +38,6 @@ build/type.o: src/type.cpp UtilityTools/type.hpp
 clean:
 	rm -r build/
 	rm -r lib/
-	rm python/RootNtupleWriterTool_wrap*
-	rm python/RootNtupleWriterTool.py*
-	rm python/_RootNtupleWriterTool.so
+	rm python/RootNtupleTools_wrap*
+	rm python/RootNtupleTools.py*
+	rm python/_RootNtupleTools.so

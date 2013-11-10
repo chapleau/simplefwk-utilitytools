@@ -54,7 +54,7 @@ static char DataTypeToChar(EDataType datatype)
     return 0;
 }
 
-std::unordered_map<std::size_t, std::string> RootNtupleWriterTool::m_loaded_types;
+std::unordered_multimap<std::size_t, std::string> RootNtupleWriterTool::m_loaded_types;
 std::unordered_map<std::string, std::set<std::string> > RootNtupleWriterTool::m_files_associated_trees;
 
 /////////////////////////////////////////////////////////////////// 
@@ -225,12 +225,17 @@ int RootNtupleWriterTool::registerBranch(std::string branch_name, IObjectHolder*
     //not much guarantee about std::type_info::name though..
     //if two names for same type, type will be loaded twice..ok
     //if two types for same name, only the first one will be loaded
-    //use hash_code instead..
+    //use hash_code instead..not much guarantee either actually, (collisions)
+    //std says same value if two type_info are equal (not necessarily a if-and-only-if).
+    //so use a multi_map !
+
+    //could we store pointers to type_info instead ? ... depends on the implementation of typeid (?)
     
     std::string typeid_name = obj->getTypeInfo().name();
     //c++11
     std::size_t typeid_hash  = obj->getTypeInfo().hash_code();
     
+        
     LOG("Branch ["<<branch_name<<"] is of type (from typeid): "<<typeid_name<< " ("<<demangle(typeid_name.c_str())<<") with hash_code: "<<typeid_hash, logDEBUG);
     
     EDataType type_t = TDataType::GetType( obj->getTypeInfo() );
@@ -252,12 +257,38 @@ int RootNtupleWriterTool::registerBranch(std::string branch_name, IObjectHolder*
     }
     else {
         //Load dictionnaries
-        if ( m_loaded_types.find(typeid_hash) != m_loaded_types.end() ) {
-            const std::string& class_name = m_loaded_types[typeid_hash];
-            LOG("  Type Already loaded.. "<<class_name, logDEBUG);
-            obj->setClassName(class_name);
+        int count_cl = m_loaded_types.count(typeid_hash);
+        if (count_cl > 0) {
+            
+            auto range = m_loaded_types.equal_range(typeid_hash);
+            auto it_range = range.first;
+            for ( ; it_range != range.second; ++it_range) {
+                const std::string & cl_name = it_range->second;
+                //check if typeids compare equal
+                //class should already be loaded, should be quick..
+                TClass * cl = TClass::GetClass(cl_name.c_str(), false, true); 
+                if (!cl) { // bad
+                    LOG("class "<<cl_name<<" not found..?", logERROR);
+                    continue;
+                }
+                
+                if ( cl->GetTypeInfo() && *(cl->GetTypeInfo()) == obj->getTypeInfo()) //found it !
+                    break;
+            }
+            
+            if ( it_range != range.second ) {
+                //we found a positive match..
+                const std::string& class_name =  it_range->second;
+                LOG("  Type Already loaded... "<<class_name, logDEBUG);
+                obj->setClassName(class_name);
+            }
+            else {
+                LOG("Same hash, but no positive match..",logDEBUG);
+                count_cl = 0; //so that it's picked up below
+            }
         }
-        else {
+        
+        if (count_cl == 0){ //count_cl == 0, or no positive match
             
             TClass * cl_typeid = TClass::GetClass(obj->getTypeInfo());
             if (!cl_typeid) {
@@ -266,15 +297,14 @@ int RootNtupleWriterTool::registerBranch(std::string branch_name, IObjectHolder*
                   cl_typeid = TClass::GetClass(demangled_name.c_str());
                 
                 
-                  std::cout<<demangled_name<<": "<< cl_typeid <<" -  "<<cl_typeid->GetTypeInfo()<<std::endl;
-                  return 0;
+                  LOG(demangled_name<<": "<< cl_typeid <<" -  "<<cl_typeid->GetTypeInfo(), logINFO);
                   if (!cl_typeid || !(cl_typeid->GetTypeInfo()) || *(cl_typeid->GetTypeInfo()) != obj->getTypeInfo() )
-                     {LOG("  No ROOT dictionnary available for "+demangled_name, logERROR); return 0;}
+                     {LOG("  No ROOT dictionnary available for "<<demangled_name, logERROR); return 0;}
                 
             }
-            m_loaded_types[typeid_hash] = cl_typeid->GetName();
-            LOG("  Dictionnary found: "<<m_loaded_types[typeid_hash], logDEBUG);
-            obj->setClassName(m_loaded_types[typeid_hash]);
+            m_loaded_types.emplace(typeid_hash, cl_typeid->GetName());
+            LOG("  Dictionnary found: "<<cl_typeid->GetName(), logDEBUG);
+            obj->setClassName(cl_typeid->GetName());
             
         } //not loaded
         
