@@ -14,7 +14,7 @@
 //#include "TString.h"
 #include <TROOT.h>
 
-std::unordered_map<std::string, std::set<std::string> > RootNtupleReaderTool::m_files_associated_trees;
+std::unordered_map<std::string, std::pair<TFile*,std::set<std::string> > > RootNtupleReaderTool::m_files_associated_trees;
 
 /////////////////////////////////////////////////////////////////// 
 // Public methods: 
@@ -26,7 +26,7 @@ RootNtupleReaderTool::RootNtupleReaderTool(const std::string& name,
                                            const std::string& file_name,
                                            const std::string& tree_name) :
    Messaging  ( name ),
-   m_ttree_name(tree_name), m_file_name(file_name), m_ttree(0), m_file(0)
+   m_ttree_name(tree_name), m_file_name(file_name), m_ttree(0)
 {
   Register();
 }
@@ -35,7 +35,7 @@ RootNtupleReaderTool::RootNtupleReaderTool(const std::string& name,
                                            const std::string& file_name,
                                            const std::string& tree_name, TLogLevel lvl) :
    Messaging  ( name, lvl ),
-   m_ttree_name(tree_name), m_file_name(file_name), m_ttree(0), m_file(0)
+   m_ttree_name(tree_name), m_file_name(file_name), m_ttree(0)
 {
    Register();
 }
@@ -52,11 +52,13 @@ RootNtupleReaderTool::~RootNtupleReaderTool()
      return;
   }
   
-  if (m_file) {
+  TFile * f = m_files_associated_trees[m_file_name].first;
+  
+  if (f) {
     LOG("Closing file "<<m_file_name, logDEBUG);
   
     //m_file->Close();
-    delete m_file; //Close() is called in destructor
+    delete f; //Close() is called in destructor
     
     //remove from list so that we don't double-write/close/delete
     m_files_associated_trees.erase(file_found);
@@ -86,16 +88,19 @@ void RootNtupleReaderTool::Register() {
     
     LOG("New file to open.. "<<m_file_name,logDEBUG);
     
-    m_file = new TFile(m_file_name.c_str(), "READ");
-      if (m_file->IsZombie()) {
+    TFile *f = new TFile(m_file_name.c_str(), "READ");
+      if (!f || f->IsZombie()) {
          LOG("Error opening file", logERROR);
          return;
       }
+    auto &v = m_files_associated_trees[m_file_name];
+    v.first = f;
+      
   }
   
   LOG("Root path: "<< gDirectory->GetPath(), logDEBUG);
   
-  auto & set_of_trees = m_files_associated_trees[m_file_name];
+  auto & set_of_trees = m_files_associated_trees[m_file_name].second;
   
   auto tree_found = set_of_trees.find(m_ttree_name);
   
@@ -104,7 +109,7 @@ void RootNtupleReaderTool::Register() {
   
   
   m_ttree = 0;
-  m_file->GetObject(m_ttree_name.c_str(), m_ttree);
+  m_files_associated_trees[m_file_name].first->GetObject(m_ttree_name.c_str(), m_ttree);
   
   if (!m_ttree) { LOG("Cannot find TTree with name ["<<m_ttree_name<<"] in file "<<m_file_name, logERROR); return; }
   
@@ -174,6 +179,7 @@ const T* RootNtupleReaderTool::GetBranchEntry(const std::string& branch_name, un
 
 template const int* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 template const std::vector<float>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
+template const std::vector<std::string>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 
 
 

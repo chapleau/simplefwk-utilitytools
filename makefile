@@ -19,7 +19,7 @@ python/_RootNtupleTools.so: lib/libRootNtupleTools.so python/RootNtupleTools_wra
 python/RootNtupleTools_wrap.o: python/RootNtupleTools_wrap.cxx
 	$(CC) $(CFLAGS) python/RootNtupleTools_wrap.cxx -I/usr/include/python2.7/ -o python/RootNtupleTools_wrap.o
 
-python/RootNtupleTools_wrap.cxx:
+python/RootNtupleTools_wrap.cxx: python/RootNtupleTools.i
 	swig -Wall -c++ -python python/RootNtupleTools.i
 
 lib/libRootNtupleTools.so: build/RootNtupleWriterTool.o build/RootNtupleReaderTool.o build/type.o

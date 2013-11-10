@@ -33,6 +33,7 @@ public:
 
 namespace std {
        %template(FloatVector) vector<float>;
+       %template(StringVector) vector<string>;
 }
 
 
@@ -60,6 +61,7 @@ class RootNtupleReaderTool {
 
 %template(GetBranchEntry_Int) RootNtupleReaderTool::GetBranchEntry<int>;
 %template(GetBranchEntry_FloatVector) RootNtupleReaderTool::GetBranchEntry<std::vector<float> >;
+%template(GetBranchEntry_StringVector) RootNtupleReaderTool::GetBranchEntry<std::vector<std::string> >;
 
 %include "cpointer.i"
 %pointer_functions(int, intp);

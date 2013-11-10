@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <set>
 #include <vector>
+#include <utility>
 
 #include "Services/log_levels.h"
 #include "Services/Messaging.h"
@@ -46,9 +47,9 @@ class RootNtupleReaderTool
   std::string m_file_name;
   
   TTree * m_ttree;
-  TFile * m_file;
+  //TFile * m_file;
   
-  static std::unordered_map<std::string, std::set<std::string> > m_files_associated_trees;
+  static std::unordered_map<std::string, std::pair<TFile*, std::set<std::string> > > m_files_associated_trees;
   
   std::unordered_map<std::string, TBranch * > m_branch_coll;
   std::unordered_map<std::string, int > m_status;
