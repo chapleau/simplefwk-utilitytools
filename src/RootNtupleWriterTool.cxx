@@ -98,9 +98,35 @@ void RootNtupleWriterTool::Register(bool single) {
   // Register listener for BeginRun
   inc_svc->addListener(this, "EndEvent",0,single);
   inc_svc->addListener(this, "BeginEvent",0,single);
-  inc_svc->addListener(this, "EndRun",0);
-  inc_svc->addListener(this, "BeginRun",99); //first one!
   
+  //no need for these guys to be executed more than once..
+  inc_svc->addListener(this, "EndRun",0, true);
+  inc_svc->addListener(this, "BeginRun",99, true); //first one!
+  
+
+}
+
+void RootNtupleWriterTool::cleanup() {
+   // Get handle on IncidentSvc
+  IncidentService * inc_svc = IncidentService::getInstance();
+  if (!inc_svc) {LOG("Coulnd't get IncidentService", logWARNING);}
+  
+  if (inc_svc) {
+       //de-registering ourself from the incident service
+       inc_svc->removeListener(this, "EndEvent");
+       inc_svc->removeListener(this, "BeginEvent");
+      
+       //singleShot
+       //inc_svc->removeListener(this, "EndRun");
+       //inc_svc->removeListener(this, "BeginRun");
+  }
+
+  for (coll_store_t::iterator it = m_collections.begin(); it != m_collections.end(); ++it) {
+      if ((*it).second) delete (*it).second; 
+      (*it).second = 0;
+  }
+
+  m_collections.clear();
 
 }
 
@@ -177,27 +203,11 @@ int RootNtupleWriterTool::finalize()
 
   LOG("Finalizing " << name(), logINFO);
   
-  // Get handle on IncidentSvc
-  IncidentService * inc_svc = IncidentService::getInstance();
-  if (!inc_svc) {LOG("Coulnd't get IncidentService", logWARNING);}
-
-  for (coll_store_t::iterator it = m_collections.begin(); it != m_collections.end(); ++it) {
-      if ((*it).second) delete (*it).second; 
-      (*it).second = 0;
-  }
-
-  m_collections.clear();
   
   auto file_found = m_files_associated_trees.find(m_file_name);
   if (file_found == m_files_associated_trees.end()) {
      //nothing to be done, file was written out and closed by some other owner
-     if (inc_svc) {
-       // Register listener for BeginRun
-       inc_svc->removeListener(this, "EndEvent");
-       inc_svc->removeListener(this, "BeginEvent");
-       inc_svc->removeListener(this, "EndRun");
-       inc_svc->removeListener(this, "BeginRun");
-     }
+     cleanup();
      return 1;
   }
   
@@ -217,16 +227,8 @@ int RootNtupleWriterTool::finalize()
   //delete m_ttree;
   
   
-  //de-registering ourself from the incident service
-  
-   
-  if (inc_svc) {
-     // Register listener for BeginRun
-     inc_svc->removeListener(this, "EndEvent");
-     inc_svc->removeListener(this, "BeginEvent");
-     inc_svc->removeListener(this, "EndRun");
-     inc_svc->removeListener(this, "BeginRun");
-  }
+  //perform some clean-up
+  cleanup();
   
   return 1;
 } 
