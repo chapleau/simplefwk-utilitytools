@@ -23,11 +23,12 @@ class RootNtupleWriterTool : virtual public IRootNtupleWriterTool {
 public:
 
      /// Constructor with parameters:
-  RootNtupleWriterTool(const std::string&,const std::string&,const std::string& );
-  RootNtupleWriterTool(const std::string&, const std::string&,const std::string&, TLogLevel);
+  RootNtupleWriterTool(const std::string&,const std::string&,const std::string&,bool single = false );
+  RootNtupleWriterTool(const std::string&, const std::string&,const std::string&, TLogLevel,bool single = false);
         
   ~RootNtupleWriterTool();
 };
+
 
 %include "std_vector.i"
 
@@ -65,3 +66,4 @@ class RootNtupleReaderTool {
 
 %include "cpointer.i"
 %pointer_functions(int, intp);
+

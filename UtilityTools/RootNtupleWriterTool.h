@@ -34,8 +34,8 @@ class RootNtupleWriterTool
   // Copy constructor: 
 
   /// Constructor with parameters: 
-  RootNtupleWriterTool(const std::string&,const std::string&,const std::string& );
-  RootNtupleWriterTool(const std::string&, const std::string&,const std::string&, TLogLevel);
+  RootNtupleWriterTool(const std::string&,const std::string&,const std::string&, bool single = false );
+  RootNtupleWriterTool(const std::string&, const std::string&,const std::string&, TLogLevel, bool single=false);
   
 
   /// Destructor: 
@@ -73,7 +73,7 @@ class RootNtupleWriterTool
   static std::unordered_map<std::string, std::set<std::string> > m_files_associated_trees;
   
     
-  void Register();
+  void Register(bool);
     
   //share among instances of the tool
   static std::unordered_multimap<std::size_t, std::string> m_loaded_types;

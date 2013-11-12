@@ -65,20 +65,22 @@ std::unordered_map<std::string, std::set<std::string> > RootNtupleWriterTool::m_
 ////////////////
 RootNtupleWriterTool::RootNtupleWriterTool(const std::string& name,
                                            const std::string& file_name,
-                                           const std::string& tree_name) :
+                                           const std::string& tree_name,
+                                           bool single) :
    Messaging  ( name ),
    m_ttree_name(tree_name), m_file_name(file_name), m_ttree(0), m_file(0), m_lock_tree(false)
 {
-  Register();
+  Register(single);
 }
 
 RootNtupleWriterTool::RootNtupleWriterTool(const std::string& name,
                                            const std::string& file_name,
-                                           const std::string& tree_name, TLogLevel lvl) :
+                                           const std::string& tree_name, TLogLevel lvl,
+                                           bool single) :
    Messaging  ( name, lvl ),
    m_ttree_name(tree_name), m_file_name(file_name), m_ttree(0), m_file(0), m_lock_tree(false)
 {
-   Register();
+   Register(single);
 }
 
 // Destructor
@@ -87,16 +89,16 @@ RootNtupleWriterTool::~RootNtupleWriterTool()
 {}
 
 
-void RootNtupleWriterTool::Register() {
+void RootNtupleWriterTool::Register(bool single) {
 
    // Get handle on IncidentSvc
   IncidentService * inc_svc = IncidentService::getInstance();
   if (!inc_svc) {LOG("Coulnd't get IncidentService", logERROR); return; }
   
   // Register listener for BeginRun
-  inc_svc->addListener(this, "EndEvent");
-  inc_svc->addListener(this, "BeginEvent");
-  inc_svc->addListener(this, "EndRun");
+  inc_svc->addListener(this, "EndEvent",0,single);
+  inc_svc->addListener(this, "BeginEvent",0,single);
+  inc_svc->addListener(this, "EndRun",0);
   inc_svc->addListener(this, "BeginRun",99); //first one!
   
 
@@ -174,6 +176,10 @@ int RootNtupleWriterTool::finalize()
 {
 
   LOG("Finalizing " << name(), logINFO);
+  
+  // Get handle on IncidentSvc
+  IncidentService * inc_svc = IncidentService::getInstance();
+  if (!inc_svc) {LOG("Coulnd't get IncidentService", logWARNING);}
 
   for (coll_store_t::iterator it = m_collections.begin(); it != m_collections.end(); ++it) {
       if ((*it).second) delete (*it).second; 
@@ -185,6 +191,13 @@ int RootNtupleWriterTool::finalize()
   auto file_found = m_files_associated_trees.find(m_file_name);
   if (file_found == m_files_associated_trees.end()) {
      //nothing to be done, file was written out and closed by some other owner
+     if (inc_svc) {
+       // Register listener for BeginRun
+       inc_svc->removeListener(this, "EndEvent");
+       inc_svc->removeListener(this, "BeginEvent");
+       inc_svc->removeListener(this, "EndRun");
+       inc_svc->removeListener(this, "BeginRun");
+     }
      return 1;
   }
   
@@ -202,6 +215,18 @@ int RootNtupleWriterTool::finalize()
   //delete m_file will delete all associated TObject in same TDirectory
   
   //delete m_ttree;
+  
+  
+  //de-registering ourself from the incident service
+  
+   
+  if (inc_svc) {
+     // Register listener for BeginRun
+     inc_svc->removeListener(this, "EndEvent");
+     inc_svc->removeListener(this, "BeginEvent");
+     inc_svc->removeListener(this, "EndRun");
+     inc_svc->removeListener(this, "BeginRun");
+  }
   
   return 1;
 } 
