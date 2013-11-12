@@ -161,7 +161,6 @@ int RootNtupleWriterTool::initialize()
       }
   }
   
-  LOG("Root path: "<< gDirectory->GetPath(), logDEBUG);
   
   auto & set_of_trees = m_files_associated_trees[m_file_name];
   
@@ -169,12 +168,38 @@ int RootNtupleWriterTool::initialize()
   
   if (tree_found != set_of_trees.end()) { LOG("Prob, TTree with name ["<<m_ttree_name<<"] already created..", logERROR); return 0; }
   
-  // ? set working dir
   
+  //are we requesting a directory?
+  std::size_t found_dir = m_ttree_name.find("/");
+  std::string dir_ = "";
+  if (found_dir != std::string::npos) {
+  
+     dir_ = m_ttree_name.substr(0, found_dir);
+     m_ttree_name = m_ttree_name.substr(found_dir+1);
+     
+  }
+
+  //backup current ROOT directory
+  //TDirectory* origDir = gDirectory;
+
+  std::string file_dir = m_file_name+":/";
+  if ( !gDirectory->cd(file_dir.c_str())) {LOG("Couldn't cd to "<<file_dir,logERROR); return 0;}
+  
+  if (dir_ != "") {
+      
+      if (!gDirectory->mkdir(dir_.c_str()) || !gDirectory->cd(dir_.c_str()) ) {
+          LOG("Couldn't create directory "<<dir_, logERROR); return 0;
+      }
+  }
+
+  LOG("Root path: "<< gDirectory->GetPath(), logDEBUG);
+  
+    
   m_ttree = new TTree(m_ttree_name.c_str(), m_ttree_name.c_str());
   set_of_trees.emplace(m_ttree_name);
 
-  // ? cd to previous working dir..
+  // Return to the original ROOT directory
+  //gDirectory = origDir;
 
   m_loaded_types.clear();
   
