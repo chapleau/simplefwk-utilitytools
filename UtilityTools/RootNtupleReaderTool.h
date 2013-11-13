@@ -11,6 +11,8 @@
 #include "Services/log_levels.h"
 #include "Services/Messaging.h"
 
+#include "UtilityTools/CommonRootBase.h"
+
 // Forward declaration
 
 class TTree;
@@ -18,7 +20,7 @@ class TFile;
 class TBranch;
 
 class RootNtupleReaderTool
-  : public Messaging
+  : public Messaging, public CommonRootBase
 { 
 
   /////////////////////////////////////////////////////////////////// 

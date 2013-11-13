@@ -22,8 +22,8 @@ python/RootNtupleTools_wrap.o: python/RootNtupleTools_wrap.cxx
 python/RootNtupleTools_wrap.cxx: python/RootNtupleTools.i
 	swig -Wall -c++ -python python/RootNtupleTools.i
 
-lib/libRootNtupleTools.so: build/RootNtupleWriterTool.o build/RootNtupleReaderTool.o build/type.o
-	$(CC) $(LDFLAGS) $(LDFLAGSEXTRA)libRootNtupleTools.so build/RootNtupleWriterTool.o build/RootNtupleReaderTool.o build/type.o `root-config --libs` -L../Services/lib -lServices -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o lib/libRootNtupleTools.so
+lib/libRootNtupleTools.so: build/RootNtupleWriterTool.o build/RootNtupleReaderTool.o build/type.o build/CommonRootBase.o
+	$(CC) $(LDFLAGS) $(LDFLAGSEXTRA)libRootNtupleTools.so build/RootNtupleWriterTool.o build/RootNtupleReaderTool.o build/type.o build/CommonRootBase.o `root-config --libs` -L../Services/lib -lServices -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o lib/libRootNtupleTools.so
 
 build/RootNtupleWriterTool.o: src/RootNtupleWriterTool.cxx
 	$(CC) $(CFLAGS) src/RootNtupleWriterTool.cxx `root-config --cflags` -o build/RootNtupleWriterTool.o
@@ -34,6 +34,8 @@ build/RootNtupleReaderTool.o: src/RootNtupleReaderTool.cxx
 build/type.o: src/type.cpp UtilityTools/type.hpp
 	$(CC) $(CFLAGS) src/type.cpp -o build/type.o 
 
+build/CommonRootBase.o: src/CommonRootBase.cxx UtilityTools/CommonRootBase.h
+	$(CC) $(CFLAGS) src/CommonRootBase.cxx -o build/CommonRootBase.o
 
 clean:
 	rm -r build/

@@ -137,9 +137,10 @@ int RootNtupleWriterTool::initialize()
 
   //pre-load std::vector<> dictionnary
   //only if we haven't done so yet
-  if (m_files_associated_trees.empty()) {
+  if (!m_loaded_builtin_dicts) {
     gROOT->ProcessLine("#include <string>");
     gROOT->ProcessLine("#include <vector>");
+    m_loaded_builtin_dicts = true;
   }
   
   m_lock_tree = false;

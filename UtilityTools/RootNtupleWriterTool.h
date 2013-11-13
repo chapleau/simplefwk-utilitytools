@@ -16,6 +16,8 @@
 #include "Services/log_levels.h"
 #include "Services/Messaging.h"
 
+#include "UtilityTools/CommonRootBase.h"
+
 // Forward declaration
 
 class TTree;
@@ -23,7 +25,7 @@ class TFile;
 
 class RootNtupleWriterTool
   : virtual public IRootNtupleWriterTool,
-    virtual public IIncidentListener, public Messaging
+    virtual public IIncidentListener, public Messaging, public CommonRootBase
 { 
 
   /////////////////////////////////////////////////////////////////// 

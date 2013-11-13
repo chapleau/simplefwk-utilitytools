@@ -4,6 +4,23 @@
 #include "UtilityTools/RootNtupleReaderTool.h"
 %}
 
+%include "exception.i"
+
+%exception {
+    try {
+        $action
+    }
+    catch (const std::exception & e)
+    {
+        SWIG_exception(SWIG_RuntimeError, (std::string("C++ std::exception in $decl: ") + e.what()).c_str());
+    }
+    catch (...)
+    {
+        SWIG_exception(SWIG_UnknownError, "C++ anonymous exception");
+    }
+}
+
+
 %include "std_string.i"
 
 enum TLogLevel {logERROR, logWARNING, logINFO, logDEBUG, logVERBOSE};
@@ -25,6 +42,8 @@ public:
      /// Constructor with parameters:
   RootNtupleWriterTool(const std::string&,const std::string&,const std::string&,bool single = false );
   RootNtupleWriterTool(const std::string&, const std::string&,const std::string&, TLogLevel,bool single = false);
+  
+  void stop();
         
   ~RootNtupleWriterTool();
 };
