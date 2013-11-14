@@ -180,6 +180,7 @@ const T* RootNtupleReaderTool::GetBranchEntry(const std::string& branch_name, un
 
 template const int* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 template const std::vector<float>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
+template const std::vector<double>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 template const std::vector<std::string>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 
 
