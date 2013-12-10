@@ -13,6 +13,7 @@ A makefile is provided for unix-like operating systems (tested on Mac OS X 10.7.
 (All the above can be obtained through [macports][] for Max OS X systems.)
 
 * ``simplefwk-services`` package
+* ``simplefwk-utilitytoolsinterfaces`` package
 
 ##Usage
 ###Data storage in ROOT
