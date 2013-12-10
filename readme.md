@@ -1,7 +1,37 @@
 #Simple framework - Utility tools
 
-``simplefwk-utilitytools`` contains two helper tools that abstract low-level details of ROOT's I/O infrastructure. [ROOT][] is a C++ library developed and used primarily by the High Energy Physics community. It is versatile enough to be useful in many applications dealing with a large amount of data to analyze. In particular, ROOT has its own I/O system that allows to persistify objects (in the Object-Oriented sense) on disk.
+``simplefwk-utilitytools`` contains two helper tools that abstract low-level details of ROOT's I/O infrastructure. [ROOT][] is a C++ library developed and used primarily by the High Energy Physics community. It is versatile enough to be useful in many applications dealing with large amounts of data. 
+
+##Data storage in ROOT
+
+ROOT has its own I/O system that allows to persistify objects (in the Object-Oriented sense) on disk. It provides a data structure called a tree (or a [TTree][]) designed to reduce disk space and enhance data access speed. A tree is a collection of branches representing variables whose values are to be stored multiple times. Branches can then be read back indivdually, as needed, on an entry-by-entry basis. 
+
+##Writing to a TTree
+
+``RootNtupleWriterTool`` is the helper tool to be used to seamlessly output ntuple-like data to a ROOT file. 
+The simplest constructor is as follow:
+
+```c++
+RootNtupleWriterTool::RootNtupleWriterTool(const std::string& name,       //name of the tool
+                                           const std::string& file_name,  //ROOT file name
+                                           const std::string& tree_name)  //name of TTree
+```
+
+A tool that receives a pointer to an initialized ``RootNtupleWriterTool`` only need to use two methods: one to register branches, and one to fill up branches.
+
+###Registering branches
+A branch is created in the TTree through the following method:
+
+```c++
+int RootNtupleWriterTool::registerBranch(std::string branch_name, IObjectHolder* obj)
+````
+
+Here, the first argument is self-explanatory while the second is a pointer to a newly created object (inheriting from the ``IObjectHolder`` interface) that implements data management functions specific to the type of object to be stored. This extra level of abstraction allows for a generic design where the details of the data to be stored is completely decoupled from the writer tool itself. 
+
+
+##Reading from a TTree
 
 
 
 [ROOT]: http://root.cern.ch
+[TTree]: http://root.cern.ch/root/html/TTree.html
