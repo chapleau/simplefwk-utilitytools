@@ -26,8 +26,11 @@ A branch is created in the TTree through the following method:
 int RootNtupleWriterTool::registerBranch(std::string branch_name, IObjectHolder* obj)
 ````
 
-Here, the first argument is self-explanatory while the second is a pointer to a newly created object (inheriting from the ``IObjectHolder`` interface) that implements data management functions specific to the type of object to be stored. This extra level of abstraction allows for a generic design where the details of the data to be stored is completely decoupled from the writer tool itself. 
+Here, the first argument is self-explanatory while the second is a pointer to a newly created object (inheriting from the ``IObjectHolder`` interface) that implements data management functions specific to the type of object to be stored. This extra level of abstraction allows for a generic design where the details of the data to be stored are completely decoupled from the writer tool itself. 
 
+Concrete ``IObjectHolder`` classes are available in the ``simplefwk-utilitytoolsinterfaces`` package for primitive data types and for STL containers (``std::vector`` notably).
+
+Since ROOT can only (de)serialize data into a file if it knows about it (through what is called a dictionnary), every request for branch creation perform type safety checks to assess compatibility of the branch data type with ROOT's I/O system.
 
 ##Reading from a TTree
 
