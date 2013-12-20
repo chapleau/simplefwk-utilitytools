@@ -54,7 +54,7 @@ Once a branch has been registered, it can be filled with the following method:
 int RootNtupleWriterTool::pushBack(std::string branch_name, const boost::any& data)
 ````
 
-Here, ``boost::any`` is used for data type abstraction. Safety checks are perform to make sure the data being passed can be handled by the branch's ``IObjectHolder``. An unregistered branch triggers an error.
+Here, ``boost::any`` is used for data type abstraction. Safety checks are perform at run-time to make sure the data being passed can be handled by the branch's ``IObjectHolder``. An unregistered branch triggers an error.
 
 ####Steering
 
@@ -68,7 +68,7 @@ inc_svc = IncidentService.getInstance()
 
 inc_svc.fireIncident(Incident("BeginRun"))
 
-for row in myfile:
+for row in mytxtfile:
 
   inc_svc.fireIncident(Incident("BeginEvent"))
   
@@ -87,7 +87,30 @@ During the **EndRun** incident, the TTree is written on disk to the file specifi
 
 ###Reading from a TTree
 
+``RootNtupleReaderTool`` is a simple tool that can be used to read branches out of a TTree. It can be used in Python as in this example:
 
+````python
+root_svc_reader = RootNtupleReaderTool("RootToolReader","tree.root", "ttree")
+
+ientry = 0
+while True:
+     try: 
+       vec = root_svc_reader.GetBranchEntry_DoubleVector("features",ientry)
+       targ = root_svc_reader.GetBranchEntry_Int("target", ientry)
+     except BaseException as e:
+       print "Cauth Error! -> ", str(e)
+       break
+       
+     if targ == None: break #End-Of-File
+     
+     ## do something with vec and targ
+     
+     ientry += 1
+     
+print "read ", ientry, " entries"     
+`````
+
+In this example, the TTree name **ttree** is read from the file **tree.root** entry by entry. A vector of doubles is read from the branch named **features**, and an integer is read from the **target** branch. In both cases, an exception is thrown if the requested data is not of the type associated with the branch.
 
 [ROOT]: http://root.cern.ch
 [TTree]: http://root.cern.ch/root/html/TTree.html
