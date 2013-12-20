@@ -18,33 +18,45 @@ A makefile is provided for unix-like operating systems (tested on Mac OS X 10.7.
 ##Usage
 ###Data storage in ROOT
 
-ROOT has its own I/O system that allows to persistify objects (in the Object-Oriented sense) on disk. It provides a data structure called a tree (or a [TTree][]) designed to reduce disk space and enhance data access speed. A tree is a collection of branches representing variables whose values are to be stored multiple times. Branches can then be read back indivdually, as needed, on an entry-by-entry basis. 
+ROOT has its own I/O system that allows to persistify objects (in the Object-Oriented sense) on disk. It provides a data structure called a _tree_ (or a [TTree][]) designed to reduce disk space and enhance data access speed when storing large quantities of same-class objects. A ROOT tree may have many entries and consists in a collection of branches representing objects to be stored once per entry. Branches can then be read back indivdually, as needed, on an entry-by-entry basis. 
 
 ###Writing to a TTree
 
-``RootNtupleWriterTool`` is the helper tool to be used to seamlessly output ntuple-like data to a ROOT file. 
+``RootNtupleWriterTool`` is the helper tool to be used to seamlessly output ntuple-like data to a ROOT file (using the TTree data structure). 
 The simplest constructor is as follow:
 
-```c++
+````c++
 RootNtupleWriterTool::RootNtupleWriterTool(const std::string& name,       //name of the tool
                                            const std::string& file_name,  //ROOT file name
                                            const std::string& tree_name)  //name of TTree
-```
+````
 
 A tool that receives a pointer to an initialized ``RootNtupleWriterTool`` only need to use two methods: one to register branches, and one to fill up branches [With the exception of the event-wise steering, which will be discussed below].
 
 ####Registering branches
 A branch is created in the TTree through the following method:
 
-```c++
+````c++
 int RootNtupleWriterTool::registerBranch(std::string branch_name, IObjectHolder* obj)
 ````
 
-Here, the first argument is self-explanatory while the second is a pointer to a newly created (in-place) object (inheriting from the ``IObjectHolder`` interface) that implements data management functions specific to the type of object to be stored. This extra level of abstraction allows for a generic design where the details of the data to be stored are completely decoupled from the writer tool itself. Concrete ``IObjectHolder`` classes are available in the ``simplefwk-utilitytoolsinterfaces`` package for primitive data types and for STL containers (``std::vector`` notably).
+Here, the first argument is self-explanatory (a string representing the name of the branch to be created) while the second is a pointer to a newly created object (inheriting from the ``IObjectHolder`` interface) that implements data management functions specific to the class associated with the branch. This extra level of abstraction allows for a generic design where the details of the data to be stored are completely decoupled from the writer tool itself. Concrete ``IObjectHolder`` classes are available in the ``simplefwk-utilitytoolsinterfaces`` package for primitive data types and for STL containers (``std::vector`` notably). The writer tool takes ownership of the ``IObjectHolder`` object.
 
-Since ROOT can only (de)serialize data into a file if it knows about it (through what is called a dictionnary), every request for branch creation perform type safety checks to assess the compatibility of the branch data type with ROOT's I/O system.
+A single ``IObjectHolder`` can be used to register _child_ branches. It can, for instance, provide a unique suffix (for each child branch) that will be appended to the ``branch_name`` string by the writer tool. Different member variables within a class can then be stored in independent branches.   
+
+Since ROOT can only (de)serialize data into a file if it knows about it (through what is called a _dictionnary_), every request for branch creation performs type safety checks to assess the compatibility of the branch data type with ROOT's I/O system.
 
 ####Filling up branches
+
+Once a branch has been registered, it can be filled with the following method:
+
+````c++
+int RootNtupleWriterTool::pushBack(std::string branch_name, const boost::any& data)
+````
+
+Here, ``boost::any`` is used for data type abstraction. Safety checks are perform to make sure the data being passed can be handled by the branch's ``IObjectHolder``. An unregistered branch triggers an error.
+
+####Steering
 
 ###Reading from a TTree
 
