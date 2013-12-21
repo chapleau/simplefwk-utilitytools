@@ -87,7 +87,7 @@ During the **EndRun** incident, the TTree is written on disk to the file specifi
 
 ###Reading from a TTree
 
-``RootNtupleReaderTool`` is a simple tool that can be used to read branches out of a TTree. It can be used in Python as in this example:
+``RootNtupleReaderTool`` is a simple tool that can be used to read branches out of a TTree. The following illustrates its usage in Python:
 
 ````python
 root_svc_reader = RootNtupleReaderTool("RootToolReader","tree.root", "ttree")
