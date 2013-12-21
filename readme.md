@@ -81,7 +81,7 @@ inc_svc.fireIncident(Incident("EndRun"))
 
 Here, the tool named _mytool_ can register branches in its constructor or more conveniently when the **BeginRun** incident is fired (by listening for this particular incident). 
 
-The **BeginEvent** incident is used by the ROOT writer tool to clear the content of the various ``IObjectHolder``s in preparation of ``RootNtupleWriterTool::pushBack`` calls by _mytool_. When the **EndEvent** incident is fired, the TTree is filled with the data stored in the ``IObjectHolder``s for the current event.
+The **BeginEvent** incident is used by the ROOT writer tool to clear the content of the various ``IObjectHolder``s in preparation of ``RootNtupleWriterTool::pushBack`` calls by _mytool_. When the **EndEvent** incident is fired, the TTree is filled with the data stored in the ``IObjectHolder``s for the current event (an event == an entry in the TTree).
 
 During the **EndRun** incident, the TTree is written on disk to the file specified by the user (here, tree.root). 
 
