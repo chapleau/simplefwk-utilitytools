@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Simple framework by chapleau</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Simple framework</h1>
+        <p></p>
+
+        <p class="view"><a href="https://github.com/chapleau/simplefwk-utilitytools">View the Project on GitHub <small>chapleau/simplefwk-utilitytools</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/chapleau/simplefwk-utilitytools/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/chapleau/simplefwk-utilitytools/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/chapleau/simplefwk-utilitytools">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="services-utility-tools" class="anchor" href="#services-utility-tools"><span class="octicon octicon-link"></span></a><a href="http://chapleau.github.io/simplefwk-services/">Services</a> <strong>Utility tools</strong>
+</h1>
+
+<p><code>simplefwk-utilitytools</code> contains two helper tools that abstract low-level details of ROOT's I/O infrastructure. <a href="http://root.cern.ch">ROOT</a> is a C++ library developed and used primarily by the High Energy Physics community. It is versatile enough to be useful in many applications dealing with large amounts of data. </p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>A makefile is provided for unix-like operating systems (tested on Mac OS X 10.7.5). Requirements: </p>
+
+<ul>
+<li>C++11 compliant c++ compiler (e.g. g++ 4.8)</li>
+<li>Python 2.x (e.g. version 2.7.1)</li>
+<li>
+<a href="http://swig.org">swig</a> 2.x </li>
+<li>ROOT 5.x </li>
+</ul><p>(All the above can be obtained through <a href="http://www.macports.org/">macports</a> for Max OS X systems.)</p>
+
+<ul>
+<li>
+<code>simplefwk-services</code> package</li>
+<li>
+<code>simplefwk-utilitytoolsinterfaces</code> package</li>
+</ul><h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h3>
+<a name="data-storage-in-root" class="anchor" href="#data-storage-in-root"><span class="octicon octicon-link"></span></a>Data storage in ROOT</h3>
+
+<p>ROOT has its own I/O system that allows to persistify objects (in the Object-Oriented sense) on disk. It provides a data structure called a <em>tree</em> (or a <a href="http://root.cern.ch/root/html/TTree.html">TTree</a>) designed to reduce disk space and enhance data access speed when storing large quantities of same-class objects. A ROOT tree may have many entries and consists in a collection of branches representing objects to be stored once per entry. Branches can then be read back indivdually, as needed, on an entry-by-entry basis. </p>
+
+<h3>
+<a name="writing-to-a-ttree" class="anchor" href="#writing-to-a-ttree"><span class="octicon octicon-link"></span></a>Writing to a TTree</h3>
+
+<p><code>RootNtupleWriterTool</code> is the helper tool to be used to seamlessly output ntuple-like data to a ROOT file (using the TTree data structure). 
+The simplest constructor is as follow:</p>
+
+<div class="highlight highlight-c++"><pre><span class="n">RootNtupleWriterTool</span><span class="o">::</span><span class="n">RootNtupleWriterTool</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">name</span><span class="p">,</span>       <span class="c1">//name of the tool</span>
+                                           <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">file_name</span><span class="p">,</span>  <span class="c1">//ROOT file name</span>
+                                           <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span> <span class="n">tree_name</span><span class="p">)</span>  <span class="c1">//name of TTree</span>
+</pre></div>
+
+<p>A tool that receives a pointer to an initialized <code>RootNtupleWriterTool</code> only need to use two methods: one to register branches, and one to fill up branches [With the exception of the event-wise steering, which will be discussed below].</p>
+
+<h4>
+<a name="registering-branches" class="anchor" href="#registering-branches"><span class="octicon octicon-link"></span></a>Registering branches</h4>
+
+<p>A branch is created in the TTree through the following method:</p>
+
+<div class="highlight highlight-c++"><pre><span class="kt">int</span> <span class="n">RootNtupleWriterTool</span><span class="o">::</span><span class="n">registerBranch</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">branch_name</span><span class="p">,</span> <span class="n">IObjectHolder</span><span class="o">*</span> <span class="n">obj</span><span class="p">)</span>
+</pre></div>
+
+<p>Here, the first argument is self-explanatory (a string representing the name of the branch to be created) while the second is a pointer to a newly created object (inheriting from the <code>IObjectHolder</code> interface) that implements data/memory management functions specific to the class associated with the branch. This extra level of abstraction allows for a generic design where the details of the data to be stored are completely decoupled from the writer tool itself. Concrete <code>IObjectHolder</code> classes are available in the <code>simplefwk-utilitytoolsinterfaces</code> package for primitive data types and for STL containers (<code>std::vector</code> notably). The writer tool takes ownership of the <code>IObjectHolder</code> object.</p>
+
+<p>A single <code>IObjectHolder</code> can be used to register <em>child</em> branches. It can, for instance, provide a unique suffix (for each child branch) that will be appended to the <code>branch_name</code> string by the writer tool. Different member variables within a class can then be stored in independent branches.   </p>
+
+<p>Since ROOT can only (de)serialize data into a file if it knows about it (through what is called a <em>dictionnary</em>), every request for branch creation performs type safety checks to assess the compatibility of the branch data type with ROOT's I/O system.</p>
+
+<h4>
+<a name="filling-up-branches" class="anchor" href="#filling-up-branches"><span class="octicon octicon-link"></span></a>Filling up branches</h4>
+
+<p>Once a branch has been registered, it can be filled with the following method:</p>
+
+<div class="highlight highlight-c++"><pre><span class="kt">int</span> <span class="n">RootNtupleWriterTool</span><span class="o">::</span><span class="n">pushBack</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">branch_name</span><span class="p">,</span> <span class="k">const</span> <span class="n">boost</span><span class="o">::</span><span class="n">any</span><span class="o">&amp;</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+<p>Here, <code>boost::any</code> is used for data type abstraction. Safety checks are perform at run-time to make sure the data being passed can be handled by the branch's <code>IObjectHolder</code>. An unregistered branch triggers an error.</p>
+
+<h4>
+<a name="steering" class="anchor" href="#steering"><span class="octicon octicon-link"></span></a>Steering</h4>
+
+<p>The event steering is provided by the Incident Service (see <code>simplefwk-services</code>). An example, in Python, would look like the following:</p>
+
+<div class="highlight highlight-python"><pre><span class="n">root_svc</span> <span class="o">=</span> <span class="n">RootNtupleWriterTool</span><span class="p">(</span><span class="s">"RootTool"</span><span class="p">,</span> <span class="s">"tree.root"</span><span class="p">,</span> <span class="s">"ttree"</span><span class="p">)</span>
+<span class="n">mytool</span> <span class="o">=</span> <span class="n">ToolThatOutputsData</span><span class="p">(</span><span class="n">root_svc</span><span class="p">)</span>
+
+<span class="n">inc_svc</span> <span class="o">=</span> <span class="n">IncidentService</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
+
+<span class="n">inc_svc</span><span class="o">.</span><span class="n">fireIncident</span><span class="p">(</span><span class="n">Incident</span><span class="p">(</span><span class="s">"BeginRun"</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">mytxtfile</span><span class="p">:</span>
+
+  <span class="n">inc_svc</span><span class="o">.</span><span class="n">fireIncident</span><span class="p">(</span><span class="n">Incident</span><span class="p">(</span><span class="s">"BeginEvent"</span><span class="p">))</span>
+
+  <span class="n">mytool</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+  <span class="n">inc_svc</span><span class="o">.</span><span class="n">fireIncident</span><span class="p">(</span><span class="n">Incident</span><span class="p">(</span><span class="s">"EndEvent"</span><span class="p">))</span>
+
+<span class="n">inc_svc</span><span class="o">.</span><span class="n">fireIncident</span><span class="p">(</span><span class="n">Incident</span><span class="p">(</span><span class="s">"EndRun"</span><span class="p">))</span>  
+</pre></div>
+
+<p>Here, the tool named <em>mytool</em> can register branches in its constructor or more conveniently when the <strong>BeginRun</strong> incident is fired (by listening for this particular incident). </p>
+
+<p>The <strong>BeginEvent</strong> incident is used by the ROOT writer tool to clear the content of the various <code>IObjectHolder</code>s in preparation of <code>RootNtupleWriterTool::pushBack</code> calls by <em>mytool</em>. When the <strong>EndEvent</strong> incident is fired, the TTree is filled with the data stored in the <code>IObjectHolder</code>s for the current event (an event == an entry in the TTree).</p>
+
+<p>During the <strong>EndRun</strong> incident, the TTree is written on disk to the file specified by the user (here, tree.root). </p>
+
+<h3>
+<a name="reading-from-a-ttree" class="anchor" href="#reading-from-a-ttree"><span class="octicon octicon-link"></span></a>Reading from a TTree</h3>
+
+<p><code>RootNtupleReaderTool</code> is a simple tool that can be used to read branches out of a TTree. The following illustrates its usage in Python:</p>
+
+<div class="highlight highlight-python"><pre><span class="n">root_svc_reader</span> <span class="o">=</span> <span class="n">RootNtupleReaderTool</span><span class="p">(</span><span class="s">"RootToolReader"</span><span class="p">,</span><span class="s">"tree.root"</span><span class="p">,</span> <span class="s">"ttree"</span><span class="p">)</span>
+
+<span class="n">ientry</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+     <span class="k">try</span><span class="p">:</span> 
+       <span class="n">vec</span> <span class="o">=</span> <span class="n">root_svc_reader</span><span class="o">.</span><span class="n">GetBranchEntry_DoubleVector</span><span class="p">(</span><span class="s">"features"</span><span class="p">,</span><span class="n">ientry</span><span class="p">)</span>
+       <span class="n">targ</span> <span class="o">=</span> <span class="n">root_svc_reader</span><span class="o">.</span><span class="n">GetBranchEntry_Int</span><span class="p">(</span><span class="s">"target"</span><span class="p">,</span> <span class="n">ientry</span><span class="p">)</span>
+     <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+       <span class="k">print</span> <span class="s">"Cauth Error! -&gt; "</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+       <span class="k">break</span>
+
+     <span class="k">if</span> <span class="n">targ</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="k">break</span> <span class="c">#End-Of-File</span>
+
+     <span class="c">## do something with vec and targ</span>
+
+     <span class="n">ientry</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="k">print</span> <span class="s">"read "</span><span class="p">,</span> <span class="n">ientry</span><span class="p">,</span> <span class="s">" entries"</span>     
+</pre></div>
+
+<p>In this example, the TTree name <strong>ttree</strong> is read from the file <strong>tree.root</strong> entry by entry. A vector of doubles is read from the branch named <strong>features</strong>, and an integer is read from the <strong>target</strong> branch. In both cases, an exception is thrown if the requested data is not of the type associated with the branch.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/chapleau">chapleau</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
