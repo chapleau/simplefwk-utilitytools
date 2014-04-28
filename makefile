@@ -14,10 +14,10 @@ $(LIBDIR):
 	mkdir $(LIBDIR) 
 
 python/_RootNtupleTools.so: lib/libRootNtupleTools.so python/RootNtupleTools_wrap.o
-	$(CC) $(LDFLAGS) python/RootNtupleTools_wrap.o -lpython2.7 -Llib/ -lRootNtupleTools -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o python/_RootNtupleTools.so
+	$(CC) $(LDFLAGS) python/RootNtupleTools_wrap.o -L/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config -ldl -lpython2.7 -Llib/ -lRootNtupleTools -Xlinker -rpath -Xlinker `dirname \`pwd\`` -o python/_RootNtupleTools.so
 
 python/RootNtupleTools_wrap.o: python/RootNtupleTools_wrap.cxx
-	$(CC) $(CFLAGS) python/RootNtupleTools_wrap.cxx -I/usr/include/python2.7/ -o python/RootNtupleTools_wrap.o
+	$(CC) $(CFLAGS) python/RootNtupleTools_wrap.cxx `python2.7-config --cflags` -o python/RootNtupleTools_wrap.o
 
 python/RootNtupleTools_wrap.cxx: python/RootNtupleTools.i
 	swig -Wall -c++ -python python/RootNtupleTools.i
