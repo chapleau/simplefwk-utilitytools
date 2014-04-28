@@ -23,7 +23,19 @@
 
 %include "std_string.i"
 
+
+%include "std_vector.i"
+
+namespace std {
+       %template(FloatVector) vector<float>;
+       %template(DoubleVector) vector<double>;
+       %template(StringVector) vector<string>;
+}
+
+
+
 enum TLogLevel {logERROR, logWARNING, logINFO, logDEBUG, logVERBOSE};
+
 
 class IRootNtupleWriterTool {
 
@@ -34,6 +46,7 @@ private :
 
 };
 
+
 class RootNtupleWriterTool : virtual public IRootNtupleWriterTool {
 
 
@@ -43,19 +56,16 @@ public:
   RootNtupleWriterTool(const std::string&,const std::string&,const std::string&,bool single = false );
   RootNtupleWriterTool(const std::string&, const std::string&,const std::string&, TLogLevel,bool single = false);
   
+  int registerBranch(std::string, IObjectHolder*);
+  
+  //int pushBack(std::string, const boost::any&);
+
   void stop();
         
   ~RootNtupleWriterTool();
 };
 
 
-%include "std_vector.i"
-
-namespace std {
-       %template(FloatVector) vector<float>;
-       %template(DoubleVector) vector<double>;
-       %template(StringVector) vector<string>;
-}
 
 
 class RootNtupleReaderTool {
