@@ -47,6 +47,22 @@ private :
 };
 
 
+
+namespace boost {
+
+
+class any {
+  public:
+
+  any(const int *);
+  any(const double *);
+  any(const float *);
+
+};
+
+}
+
+
 class RootNtupleWriterTool : virtual public IRootNtupleWriterTool {
 
 
@@ -58,7 +74,7 @@ public:
   
   int registerBranch(std::string, IObjectHolder*);
   
-  //int pushBack(std::string, const boost::any&);
+  int pushBack(std::string, const boost::any&);
 
   void stop();
         
@@ -97,4 +113,7 @@ class RootNtupleReaderTool {
 
 %include "cpointer.i"
 %pointer_functions(int, intp);
+%pointer_class(int, int_p);
+%pointer_class(float, float_p);
+
 
