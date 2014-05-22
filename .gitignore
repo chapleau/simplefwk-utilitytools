@@ -5,3 +5,4 @@ python/*
 !python/*.i
 !python/__init__.py
 *.DS_Store
+*~
