@@ -39,7 +39,12 @@ class RootNtupleReaderTool
   virtual ~RootNtupleReaderTool();
 
   template <class T>
+  const T* GetBranchEntryWithIndex(const std::string&, unsigned long, unsigned long);
+ 
+  template <class T>
   const T* GetBranchEntry(const std::string&, unsigned long);
+
+  int BuildIndex(const std::string&, const std::string&);
 
  protected:
  

@@ -27,6 +27,7 @@
 %include "std_vector.i"
 
 namespace std {
+       %template(IntVector) vector<int>;
        %template(FloatVector) vector<float>;
        %template(DoubleVector) vector<double>;
        %template(StringVector) vector<string>;
@@ -55,6 +56,9 @@ class any {
   public:
 
   any(const int *);
+  any(const unsigned int *);
+  any(const unsigned long long int *);
+  any(const std::string *);
   any(const double *);
   any(const float *);
 
@@ -102,18 +106,35 @@ class RootNtupleReaderTool {
   template <class T>
   const T* GetBranchEntry(const std::string&, unsigned long);
 
+  template <class T>
+  const T* GetBranchEntryWithIndex(const std::string&, unsigned long, unsigned long);
+
+  int BuildIndex(const std::string&, const std::string&);
 
 };
 
 
 %template(GetBranchEntry_Int) RootNtupleReaderTool::GetBranchEntry<int>;
+%template(GetBranchEntry_Float) RootNtupleReaderTool::GetBranchEntry<float>;
 %template(GetBranchEntry_FloatVector) RootNtupleReaderTool::GetBranchEntry<std::vector<float> >;
+%template(GetBranchEntry_IntVector) RootNtupleReaderTool::GetBranchEntry<std::vector<int> >;
 %template(GetBranchEntry_DoubleVector) RootNtupleReaderTool::GetBranchEntry<std::vector<double> >;
 %template(GetBranchEntry_StringVector) RootNtupleReaderTool::GetBranchEntry<std::vector<std::string> >;
+
+%template(GetBranchEntryWithIndex_Int) RootNtupleReaderTool::GetBranchEntryWithIndex<int>;
+%template(GetBranchEntryWithIndex_Float) RootNtupleReaderTool::GetBranchEntryWithIndex<float>;
+%template(GetBranchEntryWithIndex_FloatVector) RootNtupleReaderTool::GetBranchEntryWithIndex<std::vector<float> >;
+%template(GetBranchEntryWithIndex_IntVector) RootNtupleReaderTool::GetBranchEntryWithIndex<std::vector<int> >;
+
+
 
 %include "cpointer.i"
 %pointer_functions(int, intp);
 %pointer_class(int, int_p);
 %pointer_class(float, float_p);
+%pointer_class(unsigned int, uint_p);
+%pointer_class(unsigned long long int, ulongint_p);
+%pointer_class(std::string, string_p);
+
 
 
