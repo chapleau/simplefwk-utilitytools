@@ -116,6 +116,10 @@ class RootNtupleReaderTool {
 
 %template(GetBranchEntry_Int) RootNtupleReaderTool::GetBranchEntry<int>;
 %template(GetBranchEntry_Float) RootNtupleReaderTool::GetBranchEntry<float>;
+%template(GetBranchEntry_UInt) RootNtupleReaderTool::GetBranchEntry<unsigned int>;
+%template(GetBranchEntry_ULongInt) RootNtupleReaderTool::GetBranchEntry<unsigned long long int>;
+%template(GetBranchEntry_String) RootNtupleReaderTool::GetBranchEntry<std::string>;
+
 %template(GetBranchEntry_FloatVector) RootNtupleReaderTool::GetBranchEntry<std::vector<float> >;
 %template(GetBranchEntry_IntVector) RootNtupleReaderTool::GetBranchEntry<std::vector<int> >;
 %template(GetBranchEntry_DoubleVector) RootNtupleReaderTool::GetBranchEntry<std::vector<double> >;
@@ -130,6 +134,11 @@ class RootNtupleReaderTool {
 
 %include "cpointer.i"
 %pointer_functions(int, intp);
+%pointer_functions(float, floatp);
+%pointer_functions(unsigned int, uintp);
+%pointer_functions(unsigned long long int, ulongintp);
+%pointer_functions(std::string, stringp);
+
 %pointer_class(int, int_p);
 %pointer_class(float, float_p);
 %pointer_class(unsigned int, uint_p);
