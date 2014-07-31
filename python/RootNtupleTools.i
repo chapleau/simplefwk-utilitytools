@@ -124,6 +124,8 @@ class RootNtupleReaderTool {
 %template(GetBranchEntry_IntVector) RootNtupleReaderTool::GetBranchEntry<std::vector<int> >;
 %template(GetBranchEntry_DoubleVector) RootNtupleReaderTool::GetBranchEntry<std::vector<double> >;
 %template(GetBranchEntry_StringVector) RootNtupleReaderTool::GetBranchEntry<std::vector<std::string> >;
+%template(GetBranchEntry_UIntVector) RootNtupleReaderTool::GetBranchEntry<std::vector<unsigned int> >;
+
 
 %template(GetBranchEntryWithIndex_Int) RootNtupleReaderTool::GetBranchEntryWithIndex<int>;
 %template(GetBranchEntryWithIndex_Float) RootNtupleReaderTool::GetBranchEntryWithIndex<float>;
