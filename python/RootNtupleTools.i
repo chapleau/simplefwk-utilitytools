@@ -28,6 +28,7 @@
 
 namespace std {
        %template(IntVector) vector<int>;
+       %template(UIntVector) vector<unsigned int>;
        %template(FloatVector) vector<float>;
        %template(DoubleVector) vector<double>;
        %template(StringVector) vector<string>;
