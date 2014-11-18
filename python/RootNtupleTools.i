@@ -129,6 +129,7 @@ class RootNtupleReaderTool {
 
 
 %template(GetBranchEntryWithIndex_Int) RootNtupleReaderTool::GetBranchEntryWithIndex<int>;
+%template(GetBranchEntryWithIndex_String) RootNtupleReaderTool::GetBranchEntryWithIndex<std::string>;
 %template(GetBranchEntryWithIndex_Float) RootNtupleReaderTool::GetBranchEntryWithIndex<float>;
 %template(GetBranchEntryWithIndex_FloatVector) RootNtupleReaderTool::GetBranchEntryWithIndex<std::vector<float> >;
 %template(GetBranchEntryWithIndex_IntVector) RootNtupleReaderTool::GetBranchEntryWithIndex<std::vector<int> >;
