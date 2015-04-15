@@ -206,6 +206,7 @@ template const std::vector<double>* RootNtupleReaderTool::GetBranchEntry(const s
 template const std::vector<std::string>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 template const std::vector<int>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 template const std::vector<unsigned int>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
+template const std::vector<unsigned long long int>* RootNtupleReaderTool::GetBranchEntry(const std::string&, unsigned long);
 
 
 template const int* RootNtupleReaderTool::GetBranchEntryWithIndex(const std::string&, unsigned long, unsigned long);
@@ -213,7 +214,7 @@ template const std::string* RootNtupleReaderTool::GetBranchEntryWithIndex(const 
 template const float* RootNtupleReaderTool::GetBranchEntryWithIndex(const std::string&, unsigned long, unsigned long);
 template const std::vector<float>* RootNtupleReaderTool::GetBranchEntryWithIndex(const std::string&, unsigned long, unsigned long);
 template const std::vector<int>* RootNtupleReaderTool::GetBranchEntryWithIndex(const std::string&, unsigned long, unsigned long);
-
+template const std::vector<unsigned long long int>* RootNtupleReaderTool::GetBranchEntryWithIndex(const std::string&, unsigned long, unsigned long);
 
 
 
