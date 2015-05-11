@@ -135,7 +135,7 @@ class RootNtupleReaderTool {
 %template(GetBranchEntryWithIndex_FloatVector) RootNtupleReaderTool::GetBranchEntryWithIndex<std::vector<float> >;
 %template(GetBranchEntryWithIndex_IntVector) RootNtupleReaderTool::GetBranchEntryWithIndex<std::vector<int> >;
 %template(GetBranchEntryWithIndex_ULongIntVector) RootNtupleReaderTool::GetBranchEntryWithIndex<std::vector<unsigned long long int> >;
-
+%template(GetBranchEntryWithIndex_ULongInt) RootNtupleReaderTool::GetBranchEntryWithIndex<unsigned long long int>;
 
 %include "cpointer.i"
 %pointer_functions(int, intp);
