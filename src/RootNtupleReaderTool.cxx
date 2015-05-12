@@ -149,7 +149,7 @@ const T* RootNtupleReaderTool::GetBranchEntry(const std::string& branch_name, un
     
     TBranch* & br = m_branch_coll[branch_name];
     br = m_ttree->GetBranch(branch_name.c_str());
-    if (!br) { LOG("Couldn't retrieve branch! ",logERROR); return (T*)0; }
+    if (!br) { LOG("Couldn't retrieve branch! ["<<branch_name<<"]",logERROR); return (T*)0; }
     //let the branch deal with the ownership of the data
     br->SetAddress(0);
     
